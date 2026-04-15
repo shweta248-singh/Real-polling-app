@@ -12,7 +12,7 @@ export default {
       colors: {
         primary: '#4f46e5', // indigo-600
         primaryHover: '#4338ca', // indigo-700
-        secondary: '#0f172a', // slate-900
+        secondary: '#0f1a35', // slate-900
         accent: '#8b5cf6', // violet-500
         background: '#f8fafc', // slate-50
       },

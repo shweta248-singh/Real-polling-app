@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
+    <div className="min-h-screen bg-gradient-to-r from-indigo-400 via-white to-sky-400">
     <AuthProvider>
       <SocketProvider>
         <Router>
@@ -28,6 +29,7 @@ function App() {
         </Router>
       </SocketProvider>
     </AuthProvider>
+    </div>
   );
 }
 
