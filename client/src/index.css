@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    @apply h-full min-h-screen;
+  }
+  body {
+    @apply font-sans antialiased text-slate-800 selection:bg-indigo-200 selection:text-indigo-900;
+    /* Soft Premium Light Gradient */
+    background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 50%, #dbeafe 100%);
+    background-attachment: fixed;
+  }
+}
