@@ -1,74 +1,74 @@
-// import Poll from '../models/Poll.js';
-// import Vote from '../models/Vote.js';
+import Poll from '../models/Poll.js';
+import Vote from '../models/Vote.js';
 
-// // @desc    Get all polls
-// // @route   GET /api/polls
-// // @access  Private
-// export const getPolls = async (req, res) => {
-//   try {
-//     const polls = await Poll.find().sort({ createdAt: -1 });
-//     res.json(polls);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
+// @desc    Get all polls
+// @route   GET /api/polls
+// @access  Private
+export const getPolls = async (req, res) => {
+  try {
+    const polls = await Poll.find().sort({ createdAt: -1 });
+    res.json(polls);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
-// // @desc    Create a poll
-// // @route   POST /api/polls
-// // @access  Private/Admin
-// export const createPoll = async (req, res) => {
-//   try {
-//     const { question, options, durationMinutes } = req.body;
+// @desc    Create a poll
+// @route   POST /api/polls
+// @access  Private/Admin
+export const createPoll = async (req, res) => {
+  try {
+    const { question, options, durationMinutes } = req.body;
 
-//     // Default to 24 hours if not specified
-//     const minutes = durationMinutes || 24 * 60;
-//     const expiresAt = new Date(Date.now() + minutes * 60000);
+    // Default to 24 hours if not specified
+    const minutes = durationMinutes || 24 * 60;
+    const expiresAt = new Date(Date.now() + minutes * 60000);
 
-//     const formattedOptions = options.map(opt => ({ text: opt, votes: 0 }));
+    const formattedOptions = options.map(opt => ({ text: opt, votes: 0 }));
 
-//     const poll = new Poll({
-//       question,
-//       options: formattedOptions,
-//       expiresAt,
-//       createdBy: req.user._id
-//     });
+    const poll = new Poll({
+      question,
+      options: formattedOptions,
+      expiresAt,
+      createdBy: req.user._id
+    });
 
-//     const createdPoll = await poll.save();
+    const createdPoll = await poll.save();
 
-//     // Emit new poll event globally
-//     req.io.emit('pollCreated', createdPoll);
+    // Emit new poll event globally
+    req.io.emit('pollCreated', createdPoll);
 
-//     res.status(201).json(createdPoll);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
+    res.status(201).json(createdPoll);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
-// // @desc    Delete a poll
-// // @route   DELETE /api/polls/:id
-// // @access  Private/Admin
-// export const deletePoll = async (req, res) => {
-//   try {
-//     const poll = await Poll.findById(req.params.id);
+// @desc    Delete a poll
+// @route   DELETE /api/polls/:id
+// @access  Private/Admin
+export const deletePoll = async (req, res) => {
+  try {
+    const poll = await Poll.findById(req.params.id);
 
-//     if (poll) {
-//       await Vote.deleteMany({ poll: poll._id });
-//       await poll.deleteOne();
+    if (poll) {
+      await Vote.deleteMany({ poll: poll._id });
+      await poll.deleteOne();
 
-//       req.io.emit('pollDeleted', req.params.id);
+      req.io.emit('pollDeleted', req.params.id);
 
-//       res.json({ message: 'Poll removed' });
-//     } else {
-//       res.status(404).json({ message: 'Poll not found' });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
+      res.json({ message: 'Poll removed' });
+    } else {
+      res.status(404).json({ message: 'Poll not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
-// // @desc    Vote on a poll
-// // @route   POST /api/polls/:id/vote
-// // @access  Private
+// @desc    Vote on a poll
+// @route   POST /api/polls/:id/vote
+// @access  Private
 // export const votePoll = async (req, res) => {
 //   try {
 //     const poll = await Poll.findById(req.params.id);
@@ -148,113 +148,8 @@
 //       }
 //     }
 //   }
-// };
+// }
 
-
-//     // @desc    Check user's vote for a specific poll
-//     // @route   GET /api/polls/:id/myvote
-//     // @access  Private
-//     export const getMyVote = async (req, res) => {
-//       try {
-//         const vote = await Vote.findOne({ user: req.user._id, poll: req.params.id });
-//         if (vote) {
-//           res.json({ voted: true, optionIndex: vote.optionIndex });
-//         } else {
-//           res.json({ voted: false });
-//         }
-//       } catch (error) {
-//         res.status(500).json({ message: error.message });
-//       }
-//     };
-
-//     // @desc    Get user's all votes
-//     // @route   GET /api/polls/myvotes/all
-//     // @access  Private
-//     export const getAllMyVotes = async (req, res) => {
-//       try {
-//         const votes = await Vote.find({ user: req.user._id });
-//         res.json(votes);
-//       } catch (error) {
-//         res.status(500).json({ message: error.message });
-//       }
-//     };
-  
-
-import Poll from '../models/Poll.js';
-import Vote from '../models/Vote.js';
-
-// @desc    Get all polls
-// @route   GET /api/polls
-// @access  Private
-export const getPolls = async (req, res) => {
-  try {
-    const polls = await Poll.find().sort({ createdAt: -1 });
-    res.json(polls);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// @desc    Create a poll
-// @route   POST /api/polls
-// @access  Private/Admin
-export const createPoll = async (req, res) => {
-  try {
-    const { question, options, durationMinutes } = req.body;
-
-    const minutes = durationMinutes || 24 * 60;
-    const expiresAt = new Date(Date.now() + minutes * 60000);
-
-    const formattedOptions = options.map(opt => ({
-      text: opt,
-      votes: 0
-    }));
-
-    const poll = new Poll({
-      question,
-      options: formattedOptions,
-      expiresAt,
-      createdBy: req.user._id
-    });
-
-    const createdPoll = await poll.save();
-
-    // 🔥 Emit new poll
-    req.io.emit('pollCreated', createdPoll);
-
-    res.status(201).json(createdPoll);
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// @desc    Delete a poll
-// @route   DELETE /api/polls/:id
-// @access  Private/Admin
-export const deletePoll = async (req, res) => {
-  try {
-    const poll = await Poll.findById(req.params.id);
-
-    if (!poll) {
-      return res.status(404).json({ message: 'Poll not found' });
-    }
-
-    await Vote.deleteMany({ poll: poll._id });
-    await poll.deleteOne();
-
-    req.io.emit('pollDeleted', req.params.id);
-
-    res.json({ message: 'Poll removed' });
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// @desc    Vote on a poll
-// @route   POST /api/polls/:id/vote
-// @access  Private
 export const votePoll = async (req, res) => {
   try {
     const poll = await Poll.findById(req.params.id);
@@ -268,31 +163,31 @@ export const votePoll = async (req, res) => {
       return res.status(400).json({ message: 'Poll has expired' });
     }
 
-    // 🔍 Check existing vote
     const existingVote = await Vote.findOne({
       user: req.user._id,
       poll: poll._id
     });
 
     if (existingVote) {
+      // 🔁 CHANGE VOTE
       const oldIndex = existingVote.optionIndex;
 
-      // ❌ Same option clicked
+      // ❌ same option click
       if (oldIndex === optionIndex) {
         return res.status(400).json({
-          message: 'You already selected this option'
+          message: "You already selected this option"
         });
       }
 
-      // 🔁 REMOVE OLD VOTE
+      // 🔥 remove old vote
       if (poll.options[oldIndex].votes > 0) {
         poll.options[oldIndex].votes -= 1;
       }
 
-      // ➕ ADD NEW VOTE
+      // ➕ add new vote
       poll.options[optionIndex].votes += 1;
 
-      // update vote record
+      // update vote
       existingVote.optionIndex = optionIndex;
       await existingVote.save();
 
@@ -307,10 +202,9 @@ export const votePoll = async (req, res) => {
       poll.options[optionIndex].votes += 1;
     }
 
-    // 💾 Save poll
     await poll.save();
 
-    // 🔥 Emit updated poll (single clean event)
+    // 🔥 emit update
     req.io.emit('pollUpdated', poll);
 
     res.json({
@@ -331,22 +225,20 @@ export const votePoll = async (req, res) => {
   }
 };
 
+
+
+
 // @desc    Check user's vote for a specific poll
 // @route   GET /api/polls/:id/myvote
 // @access  Private
 export const getMyVote = async (req, res) => {
   try {
-    const vote = await Vote.findOne({
-      user: req.user._id,
-      poll: req.params.id
-    });
-
+    const vote = await Vote.findOne({ user: req.user._id, poll: req.params.id });
     if (vote) {
       res.json({ voted: true, optionIndex: vote.optionIndex });
     } else {
       res.json({ voted: false });
     }
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
