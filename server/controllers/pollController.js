@@ -95,14 +95,15 @@ if (existingVote) {
   const oldIndex = existingVote.optionIndex;
 
   // same option click case
-  if (oldIndex === optionIndex) {
-    return res.status(400).json({
-      message: 'You already selected this option'
-    });
-  }
+  
+  if (oldIndex !== optionIndex) {
+    // 🔁 remove old vote safely
+    if (poll.options[oldIndex].votes > 0) {
+      poll.options[oldIndex].votes -= 1;
+    }
 
   // old vote minus
-   poll.options[oldIndex].votes -= 1;
+   
 
       // new option vote add
       poll.options[optionIndex].votes += 1;
