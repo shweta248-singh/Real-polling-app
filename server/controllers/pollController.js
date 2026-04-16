@@ -83,21 +83,48 @@ export const votePoll = async (req, res) => {
     }
 
     // Check if user already voted
-    const existingVote = await Vote.findOne({ user: req.user._id, poll: poll._id });
-    if (existingVote) {
-      return res.status(400).json({ message: 'You have already voted on this poll' });
-    }
+    // Check if user already voted
+const existingVote = await Vote.findOne({
+  user: req.user._id,
+  poll: poll._id
+});
 
-    // Record the vote
-    await Vote.create({
-      user: req.user._id,
-      poll: poll._id,
-      optionIndex
+if (existingVote) {
+  // 🔁 CHANGE VOTE
+
+  const oldIndex = existingVote.optionIndex;
+
+  // same option click case
+  if (oldIndex === optionIndex) {
+    return res.status(400).json({
+      message: 'You already selected this option'
     });
+  }
 
-    // Increment vote count atomically
-    poll.options[optionIndex].votes += 1;
-    await poll.save();
+  // old vote minus
+  poll.options[oldIndex].votes -= 1;
+
+  // new vote add
+  poll.options[optionIndex].votes += 1;
+
+  // update vote
+  existingVote.optionIndex = optionIndex;
+  await existingVote.save();
+
+} else {
+  // 🆕 FIRST TIME VOTE
+
+  await Vote.create({
+    user: req.user._id,
+    poll: poll._id,
+    optionIndex
+  });
+
+  poll.options[optionIndex].votes += 1;
+}
+
+await poll.save();
+
 
     // Emit live update
     req.io.emit('voteUpdate', {

@@ -128,10 +128,14 @@ const PollCard = ({ poll, userVote, onVote, onDelete, isAdmin }) => {
   const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
   const isExpired = poll.status === 'expired';
   const hasVoted = userVote !== null;
-  const showResults = hasVoted || isExpired || isAdmin;
+  // const showResults = hasVoted || isExpired || isAdmin;
+  const showResults = isExpired || isAdmin;
+
 
   const handleVoteClick = async (index) => {
-    if (showResults || loadingIndex !== null) return;
+    // if (showResults || loadingIndex !== null) return;
+    if (isExpired || loadingIndex !== null) return;
+
     setLoadingIndex(index);
     try {
       await onVote(poll._id, index);
@@ -200,63 +204,97 @@ const PollCard = ({ poll, userVote, onVote, onDelete, isAdmin }) => {
           const isSelected = userVote === idx;
 
           return (
-            <div key={idx}>
-              {!showResults ? (
-                <button
-                  onClick={() => handleVoteClick(idx)}
-                  className={`w-full text-left px-5 py-4 border rounded-2xl transition-all duration-200 ${
-                    loadingIndex === idx
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-md hover:-translate-y-0.5 border-slate-200 bg-white'
-                  }`}
-                >
-                  <span className="font-semibold text-slate-700">
-                    {option.text}
-                  </span>
-                </button>
-              ) : (
-                <div className={`relative w-full border rounded-2xl overflow-hidden transition-all duration-300 ${
-                  isSelected 
-                    ? 'border-indigo-200 bg-indigo-50/40' 
-                    : 'border-slate-200 bg-slate-50'
-                }`}>
+            // <div key={idx}>
+            //   {!showResults ? (
+            //     <button
+            //       onClick={() => handleVoteClick(idx)}
+            //       className={`w-full text-left px-5 py-4 border rounded-2xl transition-all duration-200 ${
+            //         loadingIndex === idx
+            //           ? 'opacity-50 cursor-not-allowed'
+            //           : 'hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-md hover:-translate-y-0.5 border-slate-200 bg-white'
+            //       }`}
+            //     >
+            //       <span className="font-semibold text-slate-700">
+            //         {option.text}
+            //       </span>
+            //     </button>
+            //   ) : (
+            //     <div className={`relative w-full border rounded-2xl overflow-hidden transition-all duration-300 ${
+            //       isSelected 
+            //         ? 'border-indigo-200 bg-indigo-50/40' 
+            //         : 'border-slate-200 bg-slate-50'
+            //     }`}>
 
-                  {/* 🔥 Progress Bar */}
-                  <div
-                    className={`absolute top-0 left-0 h-full transition-all duration-1000 ${
-                      isSelected
-                        ? 'bg-gradient-to-r from-indigo-400 to-sky-400 opacity-30'
-                        : 'bg-slate-300 opacity-30'
-                    }`}
-                    style={{ width: `${percentage}%` }}
-                  ></div>
+            //       {/* 🔥 Progress Bar */}
+            //       <div
+            //         className={`absolute top-0 left-0 h-full transition-all duration-1000 ${
+            //           isSelected
+            //             ? 'bg-gradient-to-r from-indigo-400 to-sky-400 opacity-30'
+            //             : 'bg-slate-300 opacity-30'
+            //         }`}
+            //         style={{ width: `${percentage}%` }}
+            //       ></div>
 
-                  {/* Content */}
-                  <div className="relative px-5 py-4 flex justify-between items-center">
+            //       {/* Content */}
+            //       <div className="relative px-5 py-4 flex justify-between items-center">
                     
-                    <span className={`font-semibold flex items-center gap-2 ${
-                      isSelected ? 'text-indigo-700' : 'text-slate-700'
-                    }`}>
-                      {option.text}
+            //         <span className={`font-semibold flex items-center gap-2 ${
+            //           isSelected ? 'text-indigo-700' : 'text-slate-700'
+            //         }`}>
+            //           {option.text}
 
-                      {isSelected && (
-                        <CheckCircle2 className="w-5 h-5 text-indigo-500 animate-fade-in" />
-                      )}
-                    </span>
+            //           {isSelected && (
+            //             <CheckCircle2 className="w-5 h-5 text-indigo-500 animate-fade-in" />
+            //           )}
+            //         </span>
 
-                    <span className={`font-bold ${
-                      isSelected ? 'text-indigo-600' : 'text-slate-500'
-                    }`}>
-                      {percentage}% 
-                      <span className="text-xs ml-1 opacity-70">
-                        ({option.votes})
-                      </span>
-                    </span>
+            //         <span className={`font-bold ${
+            //           isSelected ? 'text-indigo-600' : 'text-slate-500'
+            //         }`}>
+            //           {percentage}% 
+            //           <span className="text-xs ml-1 opacity-70">
+            //             ({option.votes})
+            //           </span>
+            //         </span>
 
-                  </div>
-                </div>
-              )}
-            </div>
+            //       </div>
+            //     </div>
+            //   )}
+            // </div>
+
+            <button
+              key={idx}
+              onClick={() => handleVoteClick(idx)}
+              className={`w-full text-left px-5 py-4 border rounded-2xl transition-all duration-200 ${
+                loadingIndex === idx
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-md hover:-translate-y-0.5'
+              } ${
+                isSelected
+                  ? 'border-indigo-500 bg-indigo-100'
+                  : 'border-slate-200 bg-white'
+              }`}
+            >
+              <div className="flex justify-between items-center">
+
+                <span className="font-semibold text-slate-700 flex items-center gap-2">
+                  {option.text}
+
+                  {isSelected && (
+                    <CheckCircle2 className="w-5 h-5 text-indigo-500" />
+                  )}
+                </span>
+
+                {/* 🔥 Live Result Always Visible */}
+                <span className="font-bold text-slate-600">
+                  {percentage}%
+                  <span className="text-xs ml-1 opacity-70">
+                    ({option.votes})
+                  </span>
+                </span>
+
+              </div>
+            </button>
           );
         })}
       </div>
