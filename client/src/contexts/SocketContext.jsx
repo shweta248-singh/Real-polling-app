@@ -11,7 +11,7 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     let newSocket;
     if (user) {
-      newSocket = io('http://localhost:5000'); // adjust for production
+      newSocket = io('https://real-polling-app.onrender.com'); // adjust for production
       setSocket(newSocket);
     }
     
