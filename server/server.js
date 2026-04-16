@@ -105,7 +105,26 @@ const corsOptions = {
   credentials: true
 };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+
+
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://real-time-polling-app.netlify.app"
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 // 🔥 SOCKET.IO SETUP

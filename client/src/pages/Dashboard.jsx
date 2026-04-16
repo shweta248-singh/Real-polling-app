@@ -184,8 +184,8 @@ const Dashboard = () => {
   const fetchData = async () => {
     try {
       const [pollsRes, votesRes] = await Promise.all([
-        api.get('/polls'),
-        api.get('/polls/myvotes/all')
+        api.get('/api/polls'),
+        api.get('/api/polls/myvotes/all')
       ]);
 
       setPolls(pollsRes.data);
@@ -250,7 +250,7 @@ const Dashboard = () => {
 
   const handleVote = async (pollId, optionIndex) => {
     try {
-      await api.post(`/polls/${pollId}/vote`, { optionIndex });
+      await api.post(`/api/polls/${pollId}/vote`, { optionIndex });
       setMyVotes(prev => ({ ...prev, [pollId]: optionIndex }));
     } catch (error) {
       alert(error.response?.data?.message || 'Vote failed');
@@ -260,7 +260,7 @@ const Dashboard = () => {
   const handleDelete = async (pollId) => {
     if (!window.confirm('Are you sure you want to delete this poll?')) return;
     try {
-      await api.delete(`/polls/${pollId}`);
+      await api.delete(`/api/polls/${pollId}`);
     } catch (error) {
       alert('Failed to delete poll');
     }

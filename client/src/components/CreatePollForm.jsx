@@ -185,7 +185,7 @@ const CreatePollForm = ({ onPollCreated }) => {
     setError('');
 
     try {
-      const { data } = await api.post('/polls', {
+      const { data } = await api.post('/api/polls', {
         question,
         options: validOptions,
         durationMinutes
