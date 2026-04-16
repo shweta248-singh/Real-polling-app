@@ -102,17 +102,14 @@ if (existingVote) {
   }
 
   // old vote minus
-  if (poll.options[oldIndex]) {
-        poll.options[oldIndex].votes -= 1;
-      }
+   poll.options[oldIndex].votes -= 1;
 
-      if (poll.options[optionIndex]) {
-        poll.options[optionIndex].votes += 1;
-      }
+      // new option vote add
+      poll.options[optionIndex].votes += 1;
 
+      // update vote
       existingVote.optionIndex = optionIndex;
       await existingVote.save();
-
 } else {
   // 🆕 FIRST TIME VOTE
 
