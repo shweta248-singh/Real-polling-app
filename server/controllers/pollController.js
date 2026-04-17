@@ -69,6 +69,88 @@ export const deletePoll = async (req, res) => {
 // @desc    Vote on a poll
 // @route   POST /api/polls/:id/vote
 // @access  Private
+// export const votePoll = async (req, res) => {
+//   try {
+//     const poll = await Poll.findById(req.params.id);
+//     const { optionIndex } = req.body;
+
+//     if (!poll) {
+//       return res.status(404).json({ message: 'Poll not found' });
+//     }
+
+//     if (poll.status === 'expired') {
+//       return res.status(400).json({ message: 'Poll has expired' });
+//     }
+
+//     // Check if user already voted
+//     // Check if user already voted
+// const existingVote = await Vote.findOne({
+//   user: req.user._id,
+//   poll: poll._id
+// });
+
+// if (existingVote) {
+//   // 🔁 CHANGE VOTE
+
+//   const oldIndex = existingVote.optionIndex;
+
+//   // same option click case
+//   if (oldIndex === optionIndex) {
+//     return res.status(400).json({
+//       message: 'You already selected this option'
+//     });
+//   }
+
+//   // old vote minus
+//   poll.options[oldIndex].votes -= 1;
+
+//   // new vote add
+//   poll.options[optionIndex].votes += 1;
+
+//   // update vote
+//   existingVote.optionIndex = optionIndex;
+//   await existingVote.save();
+
+// } else {
+//   // 🆕 FIRST TIME VOTE
+
+//   await Vote.create({
+//     user: req.user._id,
+//     poll: poll._id,
+//     optionIndex
+//   });
+
+//   poll.options[optionIndex].votes += 1;
+// }
+
+// await poll.save();
+
+
+//     // Emit live update
+//     req.io.emit('voteUpdate', {
+//       pollId: poll._id,
+//       optionIndex,
+//       votes: poll.options[optionIndex].votes
+//     });
+
+//     req.io.emit('pollUpdated', poll);
+
+
+
+//     res.json({ message: 'Vote recorded successfully', poll });
+//   } catch (error) {
+//     if(error.code === 11000) {
+//       res.status(400).json({ message: 'You have already voted on this poll' });
+//     } else {
+//       res.status(500).json({ message: error.message });
+//     }
+//   }
+// };
+
+
+
+
+
 export const votePoll = async (req, res) => {
   try {
     const poll = await Poll.findById(req.params.id);
@@ -78,74 +160,72 @@ export const votePoll = async (req, res) => {
       return res.status(404).json({ message: 'Poll not found' });
     }
 
-    if (poll.status === 'expired') {
+    // ✅ Expiry check
+    if (poll.expiresAt < new Date()) {
       return res.status(400).json({ message: 'Poll has expired' });
     }
 
-    // Check if user already voted
-    // Check if user already voted
-const existingVote = await Vote.findOne({
-  user: req.user._id,
-  poll: poll._id
-});
+    // ✅ Option validation
+    if (
+      optionIndex < 0 ||
+      optionIndex >= poll.options.length
+    ) {
+      return res.status(400).json({ message: 'Invalid option' });
+    }
 
-if (existingVote) {
-  // 🔁 CHANGE VOTE
-
-  const oldIndex = existingVote.optionIndex;
-
-  // same option click case
-  if (oldIndex === optionIndex) {
-    return res.status(400).json({
-      message: 'You already selected this option'
-    });
-  }
-
-  // old vote minus
-  poll.options[oldIndex].votes -= 1;
-
-  // new vote add
-  poll.options[optionIndex].votes += 1;
-
-  // update vote
-  existingVote.optionIndex = optionIndex;
-  await existingVote.save();
-
-} else {
-  // 🆕 FIRST TIME VOTE
-
-  await Vote.create({
-    user: req.user._id,
-    poll: poll._id,
-    optionIndex
-  });
-
-  poll.options[optionIndex].votes += 1;
-}
-
-await poll.save();
-
-
-    // Emit live update
-    req.io.emit('voteUpdate', {
-      pollId: poll._id,
-      optionIndex,
-      votes: poll.options[optionIndex].votes
+    const existingVote = await Vote.findOne({
+      user: req.user._id,
+      poll: poll._id
     });
 
+    if (existingVote) {
+      const oldIndex = existingVote.optionIndex;
+
+      // ✅ Same option
+      if (oldIndex === optionIndex) {
+        return res.status(400).json({
+          message: 'You already selected this option'
+        });
+      }
+
+      // ✅ Remove old vote
+      poll.options[oldIndex].votes = Math.max(
+        0,
+        poll.options[oldIndex].votes - 1
+      );
+
+      // ✅ Add new vote
+      poll.options[optionIndex].votes += 1;
+
+      existingVote.optionIndex = optionIndex;
+      await existingVote.save();
+
+    } else {
+      // ✅ First vote
+      await Vote.create({
+        user: req.user._id,
+        poll: poll._id,
+        optionIndex
+      });
+
+      poll.options[optionIndex].votes += 1;
+    }
+
+    await poll.save();
+
+    // ✅ Single event
     req.io.emit('pollUpdated', poll);
 
+    res.json({
+      message: 'Vote recorded successfully',
+      poll
+    });
 
-
-    res.json({ message: 'Vote recorded successfully', poll });
   } catch (error) {
-    if(error.code === 11000) {
-      res.status(400).json({ message: 'You have already voted on this poll' });
-    } else {
-      res.status(500).json({ message: error.message });
-    }
+    res.status(500).json({ message: error.message });
   }
 };
+
 
 // @desc    Check user's vote for a specific poll
 // @route   GET /api/polls/:id/myvote
