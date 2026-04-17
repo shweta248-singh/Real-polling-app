@@ -210,16 +210,24 @@ const Dashboard = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleVoteUpdate = ({ pollId, optionIndex, votes }) => {
-      setPolls(current =>
-        current.map(p => {
-          if (p._id === pollId) {
-            const newOptions = [...p.options];
-            newOptions[optionIndex].votes = votes;
-            return { ...p, options: newOptions };
-          }
-          return p;
-        })
+    // const handleVoteUpdate = ({ pollId, optionIndex, votes }) => {
+    //   setPolls(current =>
+    //     current.map(p => {
+    //       if (p._id === pollId) {
+    //         const newOptions = [...p.options];
+    //         newOptions[optionIndex].votes = votes;
+    //         return { ...p, options: newOptions };
+    //       }
+    //       return p;
+    //     })
+    //   );
+    // };
+
+    const handlePollUpdated = (updatedPoll) => {
+      setPolls((current) =>
+        current.map((p) =>
+          p._id === updatedPoll._id ? updatedPoll : p
+        )
       );
     };
 
@@ -235,23 +243,47 @@ const Dashboard = () => {
       fetchData();
     };
 
-    socket.on('voteUpdate', handleVoteUpdate);
+    socket.on('pollUpdated', handlePollUpdated);
     socket.on('pollCreated', handlePollCreated);
     socket.on('pollDeleted', handlePollDeleted);
     socket.on('pollsExpired', handlePollsExpired);
 
     return () => {
-      socket.off('voteUpdate', handleVoteUpdate);
+      socket.off('pollUpdated', handlePollUpdated);
       socket.off('pollCreated', handlePollCreated);
       socket.off('pollDeleted', handlePollDeleted);
       socket.off('pollsExpired', handlePollsExpired);
     };
   }, [socket]);
 
+  // const handleVote = async (pollId, optionIndex) => {
+  //   try {
+  //     await api.post(`/api/polls/${pollId}/vote`, { optionIndex });
+  //     setMyVotes(prev => ({ ...prev, [pollId]: optionIndex }));
+  //   } catch (error) {
+  //     alert(error.response?.data?.message || 'Vote failed');
+  //   }
+  // };
+
+
   const handleVote = async (pollId, optionIndex) => {
     try {
-      await api.post(`/api/polls/${pollId}/vote`, { optionIndex });
-      setMyVotes(prev => ({ ...prev, [pollId]: optionIndex }));
+      const res = await api.post(`/api/polls/${pollId}/vote`, {
+        optionIndex
+      });
+
+      // 🔥 instant UI update (NO REFRESH NEEDED)
+      setPolls((prev) =>
+        prev.map((p) =>
+          p._id === res.data.poll._id ? res.data.poll : p
+        )
+      );
+
+      setMyVotes(prev => ({
+        ...prev,
+        [pollId]: optionIndex
+      }));
+
     } catch (error) {
       alert(error.response?.data?.message || 'Vote failed');
     }
