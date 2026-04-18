@@ -246,13 +246,39 @@ export const getMyVote = async (req, res) => {
 // @desc    Get user's all votes
 // @route   GET /api/polls/myvotes/all
 // @access  Private
+// export const getAllMyVotes = async (req, res) => {
+//   try {
+//     const votes = await Vote.find({ user: req.user._id });
+//     res.json(votes);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
+//new code.................................................
 export const getAllMyVotes = async (req, res) => {
   try {
-    const votes = await Vote.find({ user: req.user._id });
-    res.json(votes);
+    const votes = await Vote.find({ user: req.user._id })
+      .populate('user', 'name') 
+      .populate('poll', 'question options');
+
+    const formattedVotes = votes.map(v => ({
+      user: {
+        name: v.user.name
+      },
+      poll: {
+        question: v.poll.question,
+        options: v.poll.options
+      },
+      optionIndex: v.optionIndex
+    }));
+
+    res.json(formattedVotes);
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 
