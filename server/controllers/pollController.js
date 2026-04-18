@@ -259,7 +259,7 @@ export const getMyVote = async (req, res) => {
 export const getAllMyVotes = async (req, res) => {
   try {
     const votes = await Vote.find({ user: req.user._id })
-      .populate('user', 'name') 
+      .populate('user', 'name')
       .populate('poll', 'question options');
 
     const formattedVotes = votes.map(v => ({
